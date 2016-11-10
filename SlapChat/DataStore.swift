@@ -11,7 +11,8 @@ import CoreData
 
 class DataStore {
     
-    var messages:[Message] = []
+    var messages : [Message] = []
+    var recipients : [Recipient] = []
     
     static let sharedInstance = DataStore()
     
@@ -75,6 +76,7 @@ class DataStore {
                 let date2 = message2.createdAt! as Date
                 return date1 < date2
             })
+            
         } catch let error {
             print("Error fetching data: \(error)")
             messages = []
@@ -84,6 +86,24 @@ class DataStore {
             generateTestData()
         }
     }
+    
+    func fetchRecipient() {
+        let context = persistentContainer.viewContext
+        let messagesRequest: NSFetchRequest<Recipient> = Recipient.fetchRequest()
+        
+        do {
+            recipients = try context.fetch(messagesRequest)
+            
+        } catch let error {
+            print("Error fetching data: \(error)")
+            recipients = []
+        }
+        
+        if recipients.count == 0 {
+            generateRecipients()
+        }
+    }
+    
     
     // MARK: - Core Data generation of test data
     
@@ -108,5 +128,28 @@ class DataStore {
         saveContext()
         fetchData()
     }
+    
+    func generateRecipients() {
+        let context = persistentContainer.viewContext
+        
+        let recipientOne = NSEntityDescription.insertNewObject(forEntityName: "Recipient", into: context) as! Recipient
+
+        recipientOne.email = "testemail1@flatiron.com"
+        recipientOne.name = "ANTI MAGE"
+        recipientOne.phoneNumber = "123-231-4132"
+        recipientOne.twitterHandle = "www.twitter.com/testName1"
+        
+        let recipientTwo = NSEntityDescription.insertNewObject(forEntityName: "Recipient", into: context) as! Recipient
+        
+        recipientTwo.email = "testemail2@flatiron.com"
+        recipientTwo.name = "JUGGERNAUT"
+        recipientTwo.phoneNumber = "123-231-4132"
+        recipientTwo.twitterHandle = "www.twitter.com/testName2"
+
+        saveContext()
+        fetchRecipient()
+    }
+    
+    
     
 }
